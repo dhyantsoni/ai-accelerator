@@ -1,5 +1,5 @@
 module mac #(
-    parameter DATA_WIDTH = 4
+    parameter DATA_WIDTH = 4,
     parameter ACCUMULATOR_WIDTH = 2*DATA_WIDTH + 4
 ) (
     input wire [0:0] s_i,              // control signal for accumulation
@@ -20,9 +20,9 @@ module mac #(
     genvar g; 
     generate
         for (g = 0; g < DATA_WIDTH; g = g + 1) begin : add_loop
-            assign intermediate_product[g] = a_i[g] ? ({{DATA_WIDTH{1'b0}}, b_i} << g) : {2*DATA_WIDTH{1'b0}};
-        end
-    endgenerate
+            assign intermediate_product[g] = a_i[g] ? ({{DATA_WIDTH{1'b0}}, b_i} << g) : {2*DATA_WIDTH{1'b0}}; // shifter 
+        end                                                                                                    // shift by the number of iteration if 1
+    endgenerate                                                                                                // do not need to shift if 0
 
     // adds up the intermediate_product into product register
     reg [2*DATA_WIDTH-1:0] product;
