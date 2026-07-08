@@ -1,6 +1,6 @@
 module mac #(
     parameter DATA_WIDTH = 4,
-    parameter ACCUMULATOR_WIDTH = 2*DATA_WIDTH + 4
+    parameter ACCUMULATOR_WIDTH = 2*DATA_WIDTH + 4 // the 4 represents a bit of a guardrail
 ) (
     input wire [0:0] s_i,              // control signal for accumulation
     input wire [DATA_WIDTH-1:0] a_i,   // multiplier
