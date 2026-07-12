@@ -1,6 +1,6 @@
 module pe #(
     parameter DATA_WIDTH = 4,
-    parameter ACCUMULATOR_WIDTH = 2*DATA_WIDTH + 4
+    parameter ACC_WIDTH = 2*DATA_WIDTH + 4
 ) (
     input wire [0:0] clk_i,             // clock
     input wire [0:0] rst_i,             // reset
@@ -49,14 +49,14 @@ module pe #(
             psum_o <= {ACC_WIDTH{1'b0}};
         end else begin
             act_o  <= act_i;              // forward activation right, 1-cycle delay
-            psum_o <= psum_i + product;   // add my product to the incoming sum, pass down
+            psum_o <= psum_i + {{(ACC_WIDTH-2*DATA_WIDTH){1'b0}}, product};   // add my product to the incoming sum, pass down
         end
     end
 
 `ifdef COCOTB_SIM
     initial begin
-    $dumpfile ("mac.vcd");
-    $dumpvars (0, mac);
+    $dumpfile ("pe.vcd");
+    $dumpvars (0, pe);
     #1;
     end
     `endif
