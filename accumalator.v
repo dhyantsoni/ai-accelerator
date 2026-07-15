@@ -25,7 +25,7 @@ module accumalator #(
             reg [ACC_WIDTH-1:0] acc_q;
 
             // this column's incoming partial sum, sign-extended up to ACC_WIDTH.
-            // treats the value as signed two's complement (correct for INT8 math).
+            // treats the value as signed two's complement (useful for INT8 math (took so long to understand)).
             wire signed [PSUM_WIDTH-1:0] psum_c = psum_i_flat[c*PSUM_WIDTH +: PSUM_WIDTH];
             wire signed [ACC_WIDTH-1:0] psum_ext = {{(ACC_WIDTH-PSUM_WIDTH){psum_c[PSUM_WIDTH-1]}}, psum_c};
             wire [ACC_WIDTH-1:0] bias_c = bias_i_flat[c*ACC_WIDTH +: ACC_WIDTH];
