@@ -8,9 +8,9 @@ module act_skew #(
 )(
     input wire clk_i,
     input wire rst_i,
-    input [DATA_WIDTH*ROWS-1:0] wire act_i_flat,
-    output [DATA_WIDTH*ROWS-1:0] wire act_o_flat
-){
+    input  wire [DATA_WIDTH*ROWS-1:0] act_i_flat,
+    output wire [DATA_WIDTH*ROWS-1:0] act_o_flat
+);
     reg [DATA_WIDTH-1:0] delay_line [0:ROWS-1][0:ROWS-1];
 
     integer r, d;
@@ -48,4 +48,5 @@ module act_skew #(
                        delay_line[gr][gr-1];
         end
     endgenerate
-}
+
+endmodule
