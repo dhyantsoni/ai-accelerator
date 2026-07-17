@@ -16,6 +16,21 @@ module systolic_array #(
     // direction gives clean edge wires to hook up as inputs/outputs.
     wire [DATA_WIDTH-1:0] act_h  [0:ROWS-1][0:COLS];   // horizontal activation, act_h[r][c] feeds PE[r][c]
     wire [ACC_WIDTH-1:0]  psum_v [0:ROWS][0:COLS-1];   // vertical partial sum, psum_v[r][c] feeds PE[r][c]
+    wire pe_done [0:ROWS-1][0:COLS-1];  // every PE finishes its multiply together
+
+    // PEs are multi-cycle now: pulse start,
+    // wait for a PE to finish, start the next wave. one PE's done stands in for all.
+    reg step_start, running;
+    wire step_done = pe_done[0][0];
+    always @(posedge clk_i) begin
+        if (rst_i) begin
+            running <= 1'b0; step_start <= 1'b0;
+        end else begin
+            step_start <= 1'b0;
+            if (!running)       begin step_start <= 1'b1; running <= 1'b1; end
+            else if (step_done) running <= 1'b0;
+        end
+    end
 
     genvar r, c;
     generate
@@ -40,10 +55,12 @@ module systolic_array #(
                     .rst_i (rst_i),
                     .load_w_i(load_w_i),
                     .w_i (w_i_flat[(r*COLS + c)*DATA_WIDTH +: DATA_WIDTH]), // input weight
+                    .start_i (step_start),     // same start for every PE
                     .act_i (act_h[r][c]),      // in from the left
                     .psum_i (psum_v[r][c]),    // in from above
                     .act_o (act_h[r][c+1]),    // out to the right
-                    .psum_o (psum_v[r+1][c])   // out below
+                    .psum_o (psum_v[r+1][c]),  // out below
+                    .done_o (pe_done[r][c])
                 );
             end
         end
