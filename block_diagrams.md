@@ -16,12 +16,14 @@ Block diagram: [Systolic Array](https://drive.google.com/file/d/1gX0ZXrZ7IqKfoEx
 - Essentially uses a clock to stagnate the inputs so that each line accumlates
 - Here is what it looks like (i will try my best )
 
+```
 B   ^ ^ ^ ^ ^ ^
 U     ^ ^ ^ ^ ^
 F       ^ ^ ^ ^
 F         ^ ^ ^
 E           ^ ^
 R             ^
+```
 
 Block diagram: [Skew Buffer](https://drive.google.com/file/d/1yCY5LFB-YURFfUKiLkMdQnbfUh0XhYHy/view?usp=sharing)
 
