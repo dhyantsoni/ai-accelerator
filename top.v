@@ -61,7 +61,7 @@ module top #(
     wire first_tile, last_tile, tile_done;
     wire [7:0] k_tile, tile_row, tile_col;
 
-    controller #(.LOAD_CYCLES(N), .COMPUTE_CYC(2*N + DW + 6), .STORE_CYC(N)) u_ctrl (
+    controller #(.LOAD_CYCLES(N), .COMPUTE_CYC((2*N + 10) * (DW + 4)), .STORE_CYC(N)) u_ctrl (
         .clk_i(clk_i), .rst_i(rst_i), .start_i(cfg_start), .last_tile_i(last_tile),
         .w_load(w_load), .a_load(a_load), .compute_en(compute_en),
         .acc_valid(acc_valid), .tile_step(tile_step), .store_en(store_en),
@@ -91,19 +91,31 @@ module top #(
         .clk(clk_i), .we(a_we_i), .waddr(a_addr_i), .wdata(a_wdata_i), .wmask(16'hFFFF),
         .re(a_load), .raddr(a_raddr), .rdata(a_word));
 
+    // register+hold each SRAM word on its rd_valid (and load the array a cycle later) so the datapath sees defined, held data honoring the macro's 1-cycle read latency
+    reg [127:0] w_word_q, a_word_q;
+    reg w_loaded;
+    always @(posedge clk_i) begin
+        if (rst_i) begin w_word_q <= 128'd0; a_word_q <= 128'd0; w_loaded <= 1'b0; end
+        else begin
+            if (w_rvalid) w_word_q <= w_word;
+            if (a_rvalid) a_word_q <= a_word;
+            w_loaded <= w_rvalid;
+        end
+    end
+
     // skew + systolic array
     // one 128-bit weight word IS the whole 4x4 tile; low 32 bits of an act word
     // are this tile's activation vector.
     wire [DW*N-1:0] act_skewed;
     act_skew #(.DATA_WIDTH(DW), .ROWS(N)) u_skew (
         .clk_i(clk_i), .rst_i(rst_i),
-        .act_i_flat(a_word[DW*N-1:0]), .act_o_flat(act_skewed));
+        .act_i_flat(a_word_q[DW*N-1:0]), .act_o_flat(act_skewed));
 
     wire [PW*N-1:0] psum_bot;
     systolic_array #(.DATA_WIDTH(DW), .ACC_WIDTH(PW), .ROWS(N), .COLS(N)) u_array (
         .clk_i(clk_i), .rst_i(rst_i),
-        .load_w_i(w_load),
-        .w_i_flat(w_word[DW*N*N-1:0]),
+        .load_w_i(w_loaded),
+        .w_i_flat(w_word_q[DW*N*N-1:0]),
         .act_i_flat(act_skewed),
         .psum_o_flat(psum_bot));
 
