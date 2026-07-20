@@ -1,9 +1,8 @@
-// address sequencer for the SRAMs. load_i -> base, then += stride each enable.
-// the sky130 macro reads with 1-CYCLE LATENCY: the data for the address we
-// drive this cycle lands NEXT cycle. so en_i is registered into rd_valid_o --
-// when rd_valid_o is high, rdata belongs to the address issued last cycle.
-// this offset is baked in ON PURPOSE so the FSM upstream never has to think
-// about it (and so this module is easy to rule out when the FSM misbehaves).
+// address sequencer for SRAMs. load_i -> base, += stride on each enable.
+// sky130 macro has 1-cycle read latency: rdata for this cycle's address
+// arrives next cycle. en_i is registered into rd_valid_o, so when
+// rd_valid_o is high, rdata corresponds to the address issued last cycle.
+// baked in on purpose so upstream FSM doesn't need to account for it.
 module addr_gen #(
     parameter AW = 8
 )(
